@@ -35,5 +35,5 @@ while True:
         receiving = clientsocket.recv(2048).decode()
         print(f"Received:{receiving}")
     except socket.error as e:
-        print(e, "Falha")
+        print(e, "Error")
         break

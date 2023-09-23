@@ -3,8 +3,8 @@
     Exercicio 01
     Data de Criação: 11/09/2023
     Descrição: 
-        Neste programa há um cliente se conecta à um servidor usando sockets TCP , 
-        e manda mensagens para realizar requisições. Os comandos disponíveis são :
+        Neste programa há um servidor que se conecta a um cliente usando sockets TCP , 
+        e responde as requisições do cliente. Os comandos disponíveis são :
         CONNECT user, senha - Usuário se autentica e consegue acesso à outros comandos.
         PWD - Caminho absoluto do diretório do servidor.
         CHDIR path - Altera o diretorio em uso
