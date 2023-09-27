@@ -1,6 +1,6 @@
 """ 
     Aluno: Alan Lima Marques
-    Exercicio 01
+    Atividade 01 , Exercicio 01
     Data de Criação: 11/09/2023
     Descrição: 
         Neste programa há um servidor que se conecta a um cliente usando sockets TCP , 
