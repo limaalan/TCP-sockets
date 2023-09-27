@@ -84,7 +84,7 @@ def enviar_cabecalho(entrada, nomeArquivo, comandIdentif):
 while True:
     msg = str(input("=>"))
     if not msg : continue
-    print(f"Sent:{msg}")
+    #print(f"Sent:{msg}")
     if ( msg.split()[0] == "addfile"):
         nome_arquivo=msg.split()[1]
 
@@ -133,6 +133,38 @@ while True:
 
 
     elif ( msg.split()[0] == "getfileslist"):
+        nome_arquivo=""
+        listagem_arquivos=[]
+
+        if enviar_cabecalho(msg,nome_arquivo,3):
+            resposta=clientsocket.recv(3)
+            respostaTipo=int(resposta[0])
+            respostaComando=int(resposta[1])
+            respostaStatus=int(resposta[2])
+
+            if (respostaTipo==2 and respostaComando==3):
+                if (respostaStatus==1):
+                    n_arquivos=int.from_bytes(clientsocket.recv(2),byteorder='big')
+                    print(f"numero de arquivos {n_arquivos}")
+
+                    for _ in range ( n_arquivos):
+                        tamanho_nome_arquivo=int.from_bytes(clientsocket.recv(1),byteorder='big')
+                        print(f"tamanho do arquivo {tamanho_nome_arquivo}")
+
+                        # for _ in range(tamanho_nome_arquivo):
+                        #     char_nome_arq = clientsocket.recv(1)
+                        #     nome_arquivo+=char_nome_arq.decode()
+                        nome_arquivo=clientsocket.recv(tamanho_nome_arquivo).decode()
+
+                        listagem_arquivos.append(nome_arquivo)
+                        print(f"Nome arquivo: {nome_arquivo}")
+                        nome_arquivo =""
+                elif(respostaStatus==2):
+                    print("Erro na listagem de arquivos")
+                elif(respostaStatus==3):
+                    print("Não há arquivos para serem listados")
+
+                
         pass
     elif ( msg.split()[0] == "getfile"):
         pass

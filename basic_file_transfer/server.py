@@ -8,7 +8,9 @@
         e manda mensagens para realizar requisições. Os comandos disponíveis são :
         -> ADDFILE (1): adiciona um arquivo novo.
         -> DELETE (2): remove um arquivo existente.
+            Status : 1 ok , 2 erro , 3 no file to delete
         -> GETFILESLIST (3): retorna uma lista com o nome dos arquivos.
+            Status : 1 ok , 2 erro , 3 no files to list
         -> GETFILE (4): faz download de um arquivo.
 
 
@@ -119,7 +121,24 @@ def threaded_client(clientsocket):
 
         # GETFILESLIST
         if(messageType == 1 and commandIdentif == 3):
-            pass
+            resposta=bytearray(3)
+            resposta[0]=2
+            resposta[1]=3
+
+            arquivos=os.listdir("server_directory")
+            resposta[2]=1 if len(arquivos)>0 else 3 # Status "no files to list"
+            clientsocket.send(resposta)
+            clientsocket.send(len(arquivos).to_bytes(2, byteorder='big'))
+            
+            for arquivo in arquivos:
+                if len(arquivo)<256:
+                    clientsocket.send(len(arquivo).to_bytes(1,byteorder='big'))
+                    #for nome in arquivo:
+                    #    byte=str.encode(nome)
+                    #    clientsocket.send(byte)
+                    
+                    clientsocket.send(arquivo.encode())
+
         # GETFILE
         if(messageType == 1 and commandIdentif == 4):
             pass
