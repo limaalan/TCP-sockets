@@ -44,16 +44,6 @@ def enviar_cabecalho(entrada, nomeArquivo, comandIdentif):
         if nomeArquivo not in arquivos:
             print('O arquivo solicitado não existe')
             return False
-
-    """# Se já existir o arquivo
-    elif(func =='GETFILE'):
-        arquivos = os.listdir(path='./server_files')
-
-        if nomeArquivo not in arquivos:
-            print('O arquivo solicitado não existe')
-            return False
-    #ESSA VERIFICAÇÃO FICA NO SERVIDOR, NÃO FAZ SENTIDO FAZER AQUI
-    """
     
     fileNameSize = len(nomeArquivo)
         
@@ -70,9 +60,10 @@ def enviar_cabecalho(entrada, nomeArquivo, comandIdentif):
 
         clientsocket.send(cabecalho)
         # Filename
-        for nome in nomeArquivo:
-            byte = str.encode(nome)
-            clientsocket.send(byte) 
+        # for nome in nomeArquivo:
+        #     byte = str.encode(nome)
+        #     clientsocket.send(byte) 
+        clientsocket.send(nomeArquivo.encode())
         
         return True
     else:
@@ -154,6 +145,7 @@ while True:
                         # for _ in range(tamanho_nome_arquivo):
                         #     char_nome_arq = clientsocket.recv(1)
                         #     nome_arquivo+=char_nome_arq.decode()
+                        
                         nome_arquivo=clientsocket.recv(tamanho_nome_arquivo).decode()
 
                         listagem_arquivos.append(nome_arquivo)
@@ -164,7 +156,35 @@ while True:
                 elif(respostaStatus==3):
                     print("Não há arquivos para serem listados")
 
-                
-        pass
     elif ( msg.split()[0] == "getfile"):
-        pass
+        nome_arquivo = msg.split()[1]
+            
+            #Caso o retorno da função enviaCabecalho seja verdadeira
+        if enviar_cabecalho(msg, nome_arquivo, 4):
+            #Resposta do servidor
+            resposta = clientsocket.recv(3)
+            respostaTipo = int(resposta[0])
+            respostaComando = int(resposta[1])
+            respostaStatus = int(resposta[2])
+
+            if respostaTipo == 2 and respostaComando == 4:
+                #Status 1 = ok, Status 2 = falha
+                if respostaStatus == 1:
+                    tamanho_arquivo = int.from_bytes(clientsocket.recv(4), byteorder='big')
+
+                    #Recebe byte a byte
+                    # arquivo = b''
+                    # for _ in range(tamanhoArquivo):
+                    #     byte = clientsocket.recv(1)
+                    #     arquivo += byte
+                    print(f"Tamanho arquivo : {tamanho_arquivo}")
+                    arquivo = clientsocket.recv(tamanho_arquivo)
+                    print(f"arquivo recebido :{arquivo}")
+
+                    #Cria arquivo w=write b=binary 
+                    with open ('client_directory/' + nome_arquivo, 'w+b') as file:
+                        file.write(arquivo)
+                        print("Arquivo obtido e gravado com sucesso")
+                
+                elif respostaStatus==2:
+                    print("Arquivo não encontrado")

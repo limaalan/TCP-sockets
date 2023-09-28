@@ -48,32 +48,32 @@ def threaded_client(clientsocket):
         commandIdentif = int(msg[1])
         fileNameSize = int(msg[2])
 
-        nomeArquivo = b''
-        for _ in range(fileNameSize):
-            bytes = clientsocket.recv(1)
-            nomeArquivo += bytes
-        #nomeArquivo = nomeArquivo.decode('utf-8')
-        nomeArquivo = nomeArquivo.decode()
+        # nome_arquivo = b''
+        # for _ in range(fileNameSize):
+        #     bytes = clientsocket.recv(1)
+        #     nome_arquivo += bytes
+        # nome_arquivo=nome_arquivo.decode()
+        nome_arquivo = clientsocket.recv(fileNameSize).decode()
 
-        print(f"Messagetype {messageType}, command {commandIdentif}, fnsize {fileNameSize}, nome_arquivo {nomeArquivo}")
+        print(f"Messagetype {messageType}, command {commandIdentif}, fnsize {fileNameSize}, nome_arquivo {nome_arquivo}")
 
         # ADDFILE
         if(messageType == 1 and commandIdentif == 1):
             print("stop 1")
             debug = clientsocket.recv(4)
             print(f"recebido {debug}")
-            tamanhoArquivo = int.from_bytes(debug, byteorder='big')
-            print(f"tamanho arquivo {tamanhoArquivo}")
+            tamanho_arquivo = int.from_bytes(debug, byteorder='big')
+            print(f"tamanho arquivo {tamanho_arquivo}")
             # Recebe o arquivo
             arquivo = b''
-            for _ in range(tamanhoArquivo):
+            for _ in range(tamanho_arquivo):
                 bytes = clientsocket.recv(1)
                 print(f"stop 2 {bytes}")
                 arquivo += bytes
             
             # Salva o arquivo
             print("stop 31")
-            with open('server_directory/' + nomeArquivo, 'w+b') as file:
+            with open('server_directory/' + nome_arquivo, 'w+b') as file:
                 file.write(arquivo)
             print("stop 32")
 
@@ -83,9 +83,9 @@ def threaded_client(clientsocket):
             resposta[1] = 1 #COMMAND IDENTIF = 1 ( ADD )
             
             #arquivos = os.listdir(path='./server_files')
-            #resposta[2] = 1 if os.path.isfile('/server_directory'+nomeArquivo) else 2
+            #resposta[2] = 1 if os.path.isfile('/server_directory'+nome_arquivo) else 2
             print("stop 4")
-            if (os.path.isfile('server_directory/'+nomeArquivo)):
+            if (os.path.isfile('server_directory/'+nome_arquivo)):
                 resposta[2] = 1 # STATUS OK
             else:
                 resposta[2] = 2 # STATUS FAILED
@@ -104,13 +104,13 @@ def threaded_client(clientsocket):
             print("a2")
 
             # caso o arquivo exista no diretorio
-            if (os.path.isfile('server_directory/'+nomeArquivo)): 
+            if (os.path.isfile('server_directory/'+nome_arquivo)): 
                 print("a3")               
                 # remove arquivo  
-                os.remove('server_directory/' + nomeArquivo)
+                os.remove('server_directory/' + nome_arquivo)
                 print("a4")
                 # verifica se realmente foi excluido
-                resposta[2] = 2 if os.path.isfile('server_directory/'+nomeArquivo) else 1
+                resposta[2] = 2 if os.path.isfile('server_directory/'+nome_arquivo) else 1
                 print(f"a5{resposta[2]}")
             else :
                 resposta[2]=3
@@ -141,7 +141,32 @@ def threaded_client(clientsocket):
 
         # GETFILE
         if(messageType == 1 and commandIdentif == 4):
-            pass
+            arquivos = os.listdir(path='./server_directory')
+
+            resposta = bytearray(3)
+            resposta[0] = 2
+            resposta[1] = commandIdentif
+            
+            # se o arquivo existir
+            if nome_arquivo in arquivos:
+                resposta[2] = 1 #status ok
+                clientsocket.send(resposta)
+
+                # envia o tamanho do arquivo .st_size = tamanho em bytes
+                tamanho_arquivo = (os.stat('server_directory/' + nome_arquivo).st_size).to_bytes(4, "big")
+                clientsocket.send(tamanho_arquivo)
+                
+                # envia o arquivo byte a byte
+                # with open('./server_directory/' + nome_arquivo, 'rb') as file:
+                #     byte = file.read(1)
+                #     while byte != b'':
+                #         con.send(byte)
+                #         byte = file.read(1)
+                file = open('server_directory/'+nome_arquivo,'rb')
+                #print(file.read())
+                clientsocket.send(file.read())
+            else:
+                resposta[2] = 2 #Status 2 = arquivo não existe
 
     clientsocket.close()
 
