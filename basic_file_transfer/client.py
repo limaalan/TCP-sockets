@@ -18,7 +18,11 @@ PROTOCOLO :
 
     Response:
     [Message Type] [Command ident]  [Status Code] + Específicos 
-    (1 byte)            (1 byte)        (1 byte)  
+    (1 byte)            (1 byte)        (1 byte)
+
+    Status 1 : SUCESS 
+    Status 2 : FAILED
+    Status 3 : NO FILES TO DELETE / LIST   
 """
 
 import socket
@@ -34,18 +38,18 @@ clientsocket.connect((ADDR, PORT))
 
 
 #Gerencia o envio do cabeçalho em comum à todos os comandos
-def enviar_cabecalho(entrada, nomeArquivo, comandIdentif):
+def enviar_cabecalho(entrada, nome_arquivo, comandIdentif):
     func = entrada.split()[0]
 
     if(func == "addfile"):
         arquivos = os.listdir(path='./client_directory')
 
     # Checa se o arquivo existe
-        if nomeArquivo not in arquivos:
+        if nome_arquivo not in arquivos:
             print('O arquivo solicitado não existe')
             return False
     
-    fileNameSize = len(nomeArquivo)
+    fileNameSize = len(nome_arquivo)
         
     # Verifica se o nome não passa de 255 bytes
     if fileNameSize < 256:
@@ -59,11 +63,12 @@ def enviar_cabecalho(entrada, nomeArquivo, comandIdentif):
         cabecalho[2] = fileNameSize
 
         clientsocket.send(cabecalho)
+        
         # Filename
-        # for nome in nomeArquivo:
+        # for nome in nome_arquivo:
         #     byte = str.encode(nome)
         #     clientsocket.send(byte) 
-        clientsocket.send(nomeArquivo.encode())
+        clientsocket.send(nome_arquivo.encode())
         
         return True
     else:
@@ -75,7 +80,6 @@ def enviar_cabecalho(entrada, nomeArquivo, comandIdentif):
 while True:
     msg = str(input("=>"))
     if not msg : continue
-    #print(f"Sent:{msg}")
     if ( msg.split()[0] == "addfile"):
         nome_arquivo=msg.split()[1]
 
@@ -93,7 +97,7 @@ while True:
             # Espera a resposta
             resposta = clientsocket.recv(3)
             respostaTipo = int(resposta[0])
-            respostaComando = int(resposta[1])
+            respostaComando = int(resposta[1]) 
             respostaStatus = int(resposta[2])
             
             if(respostaTipo == 2 and respostaComando == 1):
@@ -120,6 +124,8 @@ while True:
                         print('Erro ao deletar arquivo')
                     elif(respostaStatus == 3):
                         print('Arquivo não existe !')
+        else : 
+            print(f"FALHA AO REALIZAR COMANDO \"{msg}\"" )
                         
 
 
@@ -136,12 +142,10 @@ while True:
             if (respostaTipo==2 and respostaComando==3):
                 if (respostaStatus==1):
                     n_arquivos=int.from_bytes(clientsocket.recv(2),byteorder='big')
-                    print(f"numero de arquivos {n_arquivos}")
+                    print(f"Numero de arquivos {n_arquivos}")
 
                     for _ in range ( n_arquivos):
                         tamanho_nome_arquivo=int.from_bytes(clientsocket.recv(1),byteorder='big')
-                        print(f"tamanho do arquivo {tamanho_nome_arquivo}")
-
                         # for _ in range(tamanho_nome_arquivo):
                         #     char_nome_arq = clientsocket.recv(1)
                         #     nome_arquivo+=char_nome_arq.decode()
@@ -159,9 +163,7 @@ while True:
     elif ( msg.split()[0] == "getfile"):
         nome_arquivo = msg.split()[1]
             
-            #Caso o retorno da função enviaCabecalho seja verdadeira
         if enviar_cabecalho(msg, nome_arquivo, 4):
-            #Resposta do servidor
             resposta = clientsocket.recv(3)
             respostaTipo = int(resposta[0])
             respostaComando = int(resposta[1])
@@ -172,14 +174,15 @@ while True:
                 if respostaStatus == 1:
                     tamanho_arquivo = int.from_bytes(clientsocket.recv(4), byteorder='big')
 
-                    #Recebe byte a byte
+                    #Recebe byte a byte ou direto
                     # arquivo = b''
                     # for _ in range(tamanhoArquivo):
                     #     byte = clientsocket.recv(1)
                     #     arquivo += byte
                     print(f"Tamanho arquivo : {tamanho_arquivo}")
                     arquivo = clientsocket.recv(tamanho_arquivo)
-                    print(f"arquivo recebido :{arquivo}")
+                    #print(f"Arquivo \"{nome_arquivo}\" recebido :{arquivo if len(arquivo<50) else  len(arquivo)}")
+                    print(f"Arquivo \"{nome_arquivo}\" recebido")
 
                     #Cria arquivo w=write b=binary 
                     with open ('client_directory/' + nome_arquivo, 'w+b') as file:
@@ -188,3 +191,4 @@ while True:
                 
                 elif respostaStatus==2:
                     print("Arquivo não encontrado")
+    #Termina conexão

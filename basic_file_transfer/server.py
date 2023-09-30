@@ -8,9 +8,7 @@
         e manda mensagens para realizar requisições. Os comandos disponíveis são :
         -> ADDFILE (1): adiciona um arquivo novo.
         -> DELETE (2): remove um arquivo existente.
-            Status : 1 ok , 2 erro , 3 no file to delete
         -> GETFILESLIST (3): retorna uma lista com o nome dos arquivos.
-            Status : 1 ok , 2 erro , 3 no files to list
         -> GETFILE (4): faz download de um arquivo.
 
 
@@ -23,6 +21,9 @@ PROTOCOLO :
     [Message Type] [Command ident]  [Status Code] + Específicos 
     (1 byte)            (1 byte)        (1 byte)  
 
+Status 1 : SUCESS 
+Status 2 : FAILED
+Status 3 : NO FILES TO DELETE / LIST  
 """
 import socket
 import os
@@ -30,10 +31,11 @@ from _thread import *
 
 ADDR = 'localhost'
 PORT = 6666
+commands={1:"addfile",2:"delete",3:"getfileslist",4:"getfile"}
 
 
 serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) 
+serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # reusa porta
 serversocket.bind((ADDR, PORT))
 serversocket.listen(20)
 
@@ -55,75 +57,57 @@ def threaded_client(clientsocket):
         # nome_arquivo=nome_arquivo.decode()
         nome_arquivo = clientsocket.recv(fileNameSize).decode()
 
-        print(f"Messagetype {messageType}, command {commandIdentif}, fnsize {fileNameSize}, nome_arquivo {nome_arquivo}")
-
+        #print(f"Messagetype {messageType}, command {commandIdentif}, fnsize {fileNameSize}, nome_arquivo {nome_arquivo}")
+        print("-"*20)
+        print(f"Received:\nType:{'request'if messageType==1 else 'response' } cmd:{commands[commandIdentif]} {nome_arquivo}")
+        
         # ADDFILE
         if(messageType == 1 and commandIdentif == 1):
-            print("stop 1")
-            debug = clientsocket.recv(4)
-            print(f"recebido {debug}")
-            tamanho_arquivo = int.from_bytes(debug, byteorder='big')
-            print(f"tamanho arquivo {tamanho_arquivo}")
+            tamanho_arquivo = int.from_bytes(clientsocket.recv(4), byteorder='big')
+            print(f"Tamanho do arquivo : {tamanho_arquivo}")
             # Recebe o arquivo
             arquivo = b''
             for _ in range(tamanho_arquivo):
                 bytes = clientsocket.recv(1)
-                print(f"stop 2 {bytes}")
                 arquivo += bytes
             
             # Salva o arquivo
-            print("stop 31")
             with open('server_directory/' + nome_arquivo, 'w+b') as file:
                 file.write(arquivo)
-            print("stop 32")
 
             # Preparo a resposta
             resposta = bytearray(3)
             resposta[0] = 2 #MESSAGE TYPE = RESPONSE
             resposta[1] = 1 #COMMAND IDENTIF = 1 ( ADD )
+            resposta[2] = 1 if os.path.isfile('/server_directory'+nome_arquivo) else 2
             
-            #arquivos = os.listdir(path='./server_files')
-            #resposta[2] = 1 if os.path.isfile('/server_directory'+nome_arquivo) else 2
-            print("stop 4")
-            if (os.path.isfile('server_directory/'+nome_arquivo)):
-                resposta[2] = 1 # STATUS OK
-            else:
-                resposta[2] = 2 # STATUS FAILED
-            print("stop 5")
             clientsocket.send(resposta)
-            print("stop 6")
 
         # DELETE
         if(messageType == 1 and commandIdentif == 2):
-            #arquivos = os.listdir(path='server_directory')
-            print("a1")
             
             resposta = bytearray(3)
-            resposta[0] = 2
-            resposta[1] = 2
-            print("a2")
+            resposta[0] = 2  #MESSAGE TYPE = RESPONSE
+            resposta[1] = 2  #COMMAND IDENTIF = 2 ( DELETE )
 
             # caso o arquivo exista no diretorio
+            print(f"Deleting {nome_arquivo}...")
             if (os.path.isfile('server_directory/'+nome_arquivo)): 
-                print("a3")               
                 # remove arquivo  
                 os.remove('server_directory/' + nome_arquivo)
-                print("a4")
                 # verifica se realmente foi excluido
                 resposta[2] = 2 if os.path.isfile('server_directory/'+nome_arquivo) else 1
-                print(f"a5{resposta[2]}")
             else :
                 resposta[2]=3
+            if(resposta[2]==1):print(f"\"{nome_arquivo}\" deleted.")
 
-            print(f"a6 {resposta[2]}")
             clientsocket.send(resposta)
-            print("a7")
 
         # GETFILESLIST
         if(messageType == 1 and commandIdentif == 3):
             resposta=bytearray(3)
-            resposta[0]=2
-            resposta[1]=3
+            resposta[0]=2#MESSAGE TYPE = RESPONS
+            resposta[1]=3#COMMAND IDENTIF = 2 ( GETFILESLIST )
 
             arquivos=os.listdir("server_directory")
             resposta[2]=1 if len(arquivos)>0 else 3 # Status "no files to list"
@@ -141,7 +125,7 @@ def threaded_client(clientsocket):
 
         # GETFILE
         if(messageType == 1 and commandIdentif == 4):
-            arquivos = os.listdir(path='./server_directory')
+            arquivos = os.listdir(path='server_directory')
 
             resposta = bytearray(3)
             resposta[0] = 2
