@@ -27,57 +27,75 @@ import os
 import math
 from _thread import *
 
-ADDR='localhost'
+ADDR='127.0.0.1'
 PORT = 6666
 
 def envia_arquivo(server_socket,endereco):
     while(True):
-        nome_arquivo = input("Escolha o arquivo a ser enviado:")
         arquivos = os.listdir("client_directory")
+        print(arquivos)
 
-        if nome_arquivo  in arquivos:
+        nome_arquivo = input("Escolha o arquivo a ser enviado:")
 
-            if len(nome_arquivo) <255:
+        #Checa existência do arquivo
+        if nome_arquivo not in arquivos:
+            print("Arquivo não existe!")
+            continue
 
-                tamanho_arquivo=os.stat("client_directory/"+nome_arquivo).st_size
-                quantidade_datagramas = math.ceil(tamanho_arquivo/1024)
-                sha1_hash=hashlib.sha1()
+        #Checa o tamanho do nome do arquivo
+        if len(nome_arquivo) >255:
+            print("Nome do arquivo excede o limite de 255 bytes!")
+            continue
+        
+        #Cacula a quantidade de blocos a serem enviados
+        tamanho_arquivo=os.stat("client_directory/"+nome_arquivo).st_size
+        quantidade_datagramas = math.ceil(tamanho_arquivo/1024)
+        
+        #Checa se o arquivo não é grande demais
+        if quantidade_datagramas>65536 :
+            print("Tamanho do arquivo excede 64MB",quantidade_datagramas)
+            continue
+        
+        sha1_hash=hashlib.sha1()
 
-            with open ("client_directory/",+nome_arquivo,'rb') as file:
-                checksum=file.read()
-                sha1_hash.update(checksum)
-                checksum=sha1_hash.hexdigest()
+        #Faz o checksum e manda as informações
+        with open ("client_directory/"+nome_arquivo,'rb') as file:
+            checksum=file.read()
+            sha1_hash.update(checksum)
+            checksum=sha1_hash.hexdigest()
 
-                #Envia primeiro datagrama com as informações do arquivo
+            #Envia primeiro datagrama com as informações do arquivo
 
-                request = nome_arquivo +';'+\
-                    checksum +';'+\
-                    str(quantidade_datagramas)
-
-                server_socket.sendto(request.encode,endereco)
-
-            with open("client_directory/"+nome_arquivo,'rb') as file:
-                arq_byte=file.read(1024)
-
-                while arq_byte != b'':
-                    server_socket.sendto(arq_byte,endereco)
-
-                    print("Enviando um pedaço do arquivo...")
-                    arq_byte= file.read(1024)
+            request = nome_arquivo +';'+\
+                checksum +';'+\
+                str(quantidade_datagramas)
             
-            status, endereco_receive= server_socket.recvfrom(1)
+            server_socket.sendto(request.encode(),endereco)
 
-            print("Operação realizada com sucesso" if status[0]==1 else "Erro ao realizar operação!")
+        #Envia os blocos
+        with open("client_directory/"+nome_arquivo,'rb') as file:
+            arq_byte=file.read(1024)
+            cont=0
+            while arq_byte != b'':
+                server_socket.sendto(arq_byte,endereco)
+                
+                print(f"Enviando um pedaço {cont} do arquivo...")
+                cont+=1
+
+                arq_byte= file.read(1024)
+        
+        status, _= server_socket.recvfrom(1)
+
+        print("Operação realizada com sucesso" if status[0]==1 else "Erro ao realizar operação!")
 
 
 
 def main():
-    endereco=(ADDR,PORT)
+    endereco = (ADDR, PORT)
 
-    #despacha as threads
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    server_socket.bind(endereco)
+    # Cria o socket UDP
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-    start_new_thread(envia_arquivo, (server_socket,endereco))
+    envia_arquivo(client_socket, endereco)
 
 main()
