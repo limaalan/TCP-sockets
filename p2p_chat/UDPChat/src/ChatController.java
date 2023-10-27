@@ -8,18 +8,16 @@ import java.util.logging.Logger;
 
 public class ChatController {
     private DatagramSocket dgramSocket;
-    private DatagramSocket origSocket;
+    //private DatagramSocket origSocket;
     private ChatGUI gui;
 
-    public ChatController(ChatGUI gui, int destPort, int origPort) {
+    public ChatController(ChatGUI gui, int port) {
         this.gui=gui;
 
         try {
-            dgramSocket = new DatagramSocket(destPort);
-            origSocket = new DatagramSocket(origPort);
-
+            dgramSocket = new DatagramSocket(port);
             dgramSocket.setReuseAddress(true);
-            origSocket.setReuseAddress(true);
+
         } catch (SocketException ex) {
             Logger.getLogger(ChatController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -46,8 +44,11 @@ public class ChatController {
             while(true){
                 try {
                     
-                    origSocket.receive(p);
-                    gui.showMessage(new String(p.getData(),0,p.getLength()));
+                    dgramSocket.receive(p);
+                    String msg= new String(p.getData(),0,p.getLength());
+                    
+                    gui.showMessage(msg);
+                    System.out.println(msg);
 
                 } catch (IOException ex) {
                     Logger.getLogger(ChatController.class.getName()).log(Level.SEVERE, null, ex);

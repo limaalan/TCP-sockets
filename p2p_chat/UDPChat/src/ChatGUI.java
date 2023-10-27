@@ -54,9 +54,9 @@ public class ChatGUI extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        lblDestIP.setText("IP destino");
+        lblDestIP.setText("IP destino: ");
 
-        lblDestPort.setText("Porta destino");
+        lblDestPort.setText("Porta destino :");
 
         txtDestIP.setText("127.0.0.1");
 
@@ -79,7 +79,7 @@ public class ChatGUI extends javax.swing.JFrame {
 
         txtApelido.setText("Joao");
 
-        lblOrigPort.setText("Porta origem");
+        lblOrigPort.setText("Porta origem :");
 
         txtOrigPort.setText("6000");
 
@@ -105,15 +105,16 @@ public class ChatGUI extends javax.swing.JFrame {
                             .addComponent(lblDestPort, javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(lblDestIP, javax.swing.GroupLayout.Alignment.LEADING))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(txtDestPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(39, 39, 39)
+                                .addGap(40, 40, 40)
                                 .addComponent(lblApelido, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(txtDestIP))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtApelido, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(19, Short.MAX_VALUE))
+                        .addComponent(txtApelido, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(11, 11, 11)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -128,17 +129,17 @@ public class ChatGUI extends javax.swing.JFrame {
                     .addComponent(txtDestPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblApelido)
                     .addComponent(txtApelido, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(2, 2, 2)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGap(5, 5, 5)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lblOrigPort)
                     .addComponent(txtOrigPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(scrollMsgArea, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtMsg, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnEnviar))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(9, Short.MAX_VALUE))
         );
 
         pack();
@@ -168,11 +169,9 @@ public class ChatGUI extends javax.swing.JFrame {
         int origPort = Integer.parseInt(txtOrigPort.getText());
         
         if (chatController == null){
-            chatController = new ChatController(this,destPort, origPort);
+            chatController = new ChatController(this,origPort);
         }
-        
-        System.out.println("TO OUVINDO O MACACO"+destPort + "na porta"+ origPort);
-        
+                
         String msg = txtMsg.getText();
         String apelido = txtApelido.getText();
         
@@ -183,15 +182,19 @@ public class ChatGUI extends javax.swing.JFrame {
                 
                 InetAddress ip = InetAddress.getByName(txtDestIP.getText());
                 
-                //List<Object> pacote = new ArrayList<>();
                 String pacote=new String();
                 List<String> emojis = Arrays.asList(":)",":(",":v");
                 
-                if (emojis.contains(msg)){
-                    pacote = pacote.concat("2;"); // tipo emoji
+                if (emojis.contains(msg)){ // tipo emoji
+                    pacote = pacote.concat("2;"); 
+                    
                 }else if (msg.contains("ECHO")) {
                     pacote = pacote.concat("4;"); // tipo ECHO
-                }else {
+                    
+                }else if (msg.contains("HTTP://")) { // tipo link
+                    pacote = pacote.concat("3;");
+                    
+                } else {
                     pacote = pacote.concat("1;"); // tipo mensagem normal
                 }
                 
@@ -203,7 +206,7 @@ public class ChatGUI extends javax.swing.JFrame {
                 //chatController.sendMsg(ip,port,msg);
                 chatController.sendMsg(ip,destPort,pacote);
                 
-                areaMsg.append("["+apelido+"]: "+msg+'\n');
+                areaMsg.append("[Eu]: "+msg+'\n');
                 areaMsg.setCaretPosition(areaMsg.getDocument().getLength());
             
             
@@ -216,9 +219,62 @@ public class ChatGUI extends javax.swing.JFrame {
 }
     
 
-public void showMessage(String msg){
-        areaMsg.append(">>"+msg+"\n");
+public void showMessage(String msg) throws UnknownHostException, IOException{
+    //separando as partes do protocolo
+    
+    
+    String[] parts = msg.split(";");
+    
+    int msgTipo = Integer.parseInt(parts[0]);
+    int apelidoLength = Integer.parseInt(parts[1]);
+    String apelido = parts[2];
+    int msgLength = Integer.parseInt(parts[3]);
+    String msgReceived= parts[4];
+    
+    String msgFormatted= "["+apelido+"]: ";
+    
+    switch (msgTipo){
+        case 1: // Tipo 1 : mensagem normal
+            msgFormatted+= msgReceived;
+            break;
+        case 2: // Tipo 2 : emoji
+            msgFormatted+=getEmote(msgReceived);
+            break;
+        case 3:// URL ??
+            msgFormatted+= msgReceived;
+            break;
+        case 4: // ECHO 
+            //Pegando a origem e destino para responder o ECHO
+            int destPort = Integer.parseInt(txtDestPort.getText());
+            int origPort = Integer.parseInt(txtOrigPort.getText());
+            InetAddress ip = InetAddress.getByName(txtDestIP.getText());
+            
+            //Modificando o tipo de mensagem para 1 ( mensagem normal ) , para que não fique em um loop infinito.
+            char[] charArray = msg.toCharArray();
+            charArray[0] = '1';
+            String modifiedMsg = new String(charArray);
+            
+            //Enviando a mensagem de volta
+            chatController.sendMsg(ip,destPort,modifiedMsg);
+            
+            msgFormatted+= msgReceived;
+            break;
+                        
     }
+    areaMsg.append(">>"+msgFormatted+"\n");
+}
+
+public String getEmote(String asciiEmoticon){
+    switch(asciiEmoticon){
+                case ":)":
+                    return "😃";
+                case ":(":
+                    return "😢";
+                case ":v":
+                    return "😎";
+            }
+    return "❌";
+}
     
     /**
      * @param args the command line arguments
