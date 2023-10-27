@@ -43,6 +43,7 @@ def thread_envia(client_socket):
         checksum=request[1]
         quantidade_datagramas=int(request[2])
 
+        #Diminui tamanho arquivo
         #Copia-se o arquivo em blocos de 1024 bytes
         # for i in range (quantidade_datagramas):
         #     data,_ = client_socket.recvfrom(1024)
@@ -50,7 +51,7 @@ def thread_envia(client_socket):
 
         arquivo = open('server_directory/'+nome_arquivo,'wb')
         for i in range(quantidade_datagramas):
-            print(f"Recebendo bloco {i}/{quantidade_datagramas}")
+            print(f"Recebendo bloco {i+1}/{quantidade_datagramas}")
             data, _ = client_socket.recvfrom(1024)
             if data == b"":
                 break
@@ -60,7 +61,7 @@ def thread_envia(client_socket):
         print("Fazendo hash")
 
         response=bytearray(1)
-        response[0]=2
+        response[0]=2 #Status do response, 2 = falha
 
         if nome_arquivo in os.listdir('client_directory'):
 
@@ -68,19 +69,27 @@ def thread_envia(client_socket):
             #Fazendo um hash do arquivo e comparando com o recebido
             arquivo = open('server_directory/'+nome_arquivo,'rb')
             sha1_hash = hashlib.sha1()
-            while True:
-                checksum_server=arquivo.read(1024)
-                if not checksum_server:break
+           
+           #Diminui tamanho arquivo
+            # while True:
+            #     checksum_server=arquivo.read(1024)
+            #     if not checksum_server:break
+            #     sha1_hash.update(checksum_server)
+
+            with open ("server_directory/"+nome_arquivo,'rb') as file:
+                checksum_server=file.read()
                 sha1_hash.update(checksum_server)
+                checksum_server=sha1_hash.hexdigest()
 
             checksum_server= sha1_hash.hexdigest()
-            arquivo.close()
+            #arquivo.close()
+            file.close()
             
             #Caso o checksum confira, escreve o arquivo
             if checksum_server==checksum:
-                response[0]= 1
+                response[0]= 1 # Status OK
                 print("arquivo recebido com sucesso")
-            else : response[0]= 3
+            else : response[0]= 3 #Status wrong checksum
 
         else : response[0]=2
 
