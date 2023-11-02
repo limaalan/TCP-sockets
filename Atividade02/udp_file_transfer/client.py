@@ -9,8 +9,8 @@
         
 PROTOCOLO : 
     Request :
-    [FILENAME] [CHECKSUM] [NUMBER_BLOCKS]  
-    (255 bytes) (1 byte)   (2 byte) -> Capacidade máxima de arquivo = 64MB 
+    [FILENAME]; [CHECKSUM]; [NUMBER_BLOCKS]  
+    (255 bytes) (40 bytes)   (2 byte) -> Capacidade máxima de arquivo = 64MB 
 
     Response:
     [OP_STATUS] 

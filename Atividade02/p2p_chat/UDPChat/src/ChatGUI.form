@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Form version="1.3" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
+  <Properties>
+    <Property name="defaultCloseOperation" type="int" value="3"/>
+  </Properties>
+  <SyntheticProperties>
+    <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
+    <SyntheticProperty name="generateCenter" type="boolean" value="false"/>
+  </SyntheticProperties>
+  <AuxValues>
+    <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
+    <AuxValue name="FormSettings_autoSetComponentName" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_generateFQN" type="java.lang.Boolean" value="true"/>
+    <AuxValue name="FormSettings_generateMnemonicsCode" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_i18nAutoMode" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_layoutCodeTarget" type="java.lang.Integer" value="1"/>
+    <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
+    <AuxValue name="FormSettings_variablesLocal" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_variablesModifier" type="java.lang.Integer" value="2"/>
+  </AuxValues>
+
+  <Layout>
+    <DimensionLayout dim="0">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
+              <EmptySpace min="-2" pref="21" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" attributes="0">
+                      <Component id="lblOrigPort" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="txtOrigPort" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
+                      <Group type="102" attributes="0">
+                          <Component id="txtMsg" max="32767" attributes="0"/>
+                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <Component id="btnEnviar" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <Component id="scrollMsgArea" min="-2" pref="363" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Group type="103" groupAlignment="1" attributes="0">
+                          <Component id="lblDestPort" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblDestIP" alignment="0" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" attributes="0">
+                              <Component id="txtDestPort" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="40" max="-2" attributes="0"/>
+                              <Component id="lblApelido" min="-2" pref="58" max="-2" attributes="0"/>
+                          </Group>
+                          <Component id="txtDestIP" max="32767" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="txtApelido" min="-2" pref="137" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="11" max="-2" attributes="0"/>
+                  </Group>
+              </Group>
+              <EmptySpace max="32767" attributes="0"/>
+          </Group>
+      </Group>
+    </DimensionLayout>
+    <DimensionLayout dim="1">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
+              <EmptySpace min="-2" pref="32" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="lblDestIP" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="txtDestIP" alignment="3" min="-2" pref="23" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="lblDestPort" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="txtDestPort" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="lblApelido" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="txtApelido" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="lblOrigPort" min="-2" max="-2" attributes="0"/>
+                  <Component id="txtOrigPort" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="scrollMsgArea" min="-2" pref="172" max="-2" attributes="0"/>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="txtMsg" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="btnEnviar" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace pref="9" max="32767" attributes="0"/>
+          </Group>
+      </Group>
+    </DimensionLayout>
+  </Layout>
+  <SubComponents>
+    <Component class="javax.swing.JLabel" name="lblDestIP">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="IP destino: "/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="lblDestPort">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Porta destino :"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="txtDestIP">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="127.0.0.1"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="txtDestPort">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="6000"/>
+      </Properties>
+    </Component>
+    <Container class="javax.swing.JScrollPane" name="scrollMsgArea">
+      <AuxValues>
+        <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
+      </AuxValues>
+
+      <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
+      <SubComponents>
+        <Component class="javax.swing.JTextArea" name="areaMsg">
+          <Properties>
+            <Property name="editable" type="boolean" value="false"/>
+            <Property name="columns" type="int" value="20"/>
+            <Property name="rows" type="int" value="5"/>
+          </Properties>
+        </Component>
+      </SubComponents>
+    </Container>
+    <Component class="javax.swing.JTextField" name="txtMsg">
+    </Component>
+    <Component class="javax.swing.JButton" name="btnEnviar">
+      <Properties>
+        <Property name="mnemonic" type="int" value="69"/>
+        <Property name="text" type="java.lang.String" value="Enviar"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnEnviarActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JLabel" name="lblApelido">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Apelido"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="txtApelido">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Joao"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="lblOrigPort">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Porta origem :"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="txtOrigPort">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="6000"/>
+      </Properties>
+    </Component>
+  </SubComponents>
+</Form>
